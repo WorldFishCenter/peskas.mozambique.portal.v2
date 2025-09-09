@@ -106,7 +106,7 @@ const TreemapTooltip = ({ active, payload, selectedTimeRange }: any) => {
               <span className="text-gray-500 dark:text-gray-400">{t("text-average-rpue") || "Average RPUE"}:</span>
               <span className="font-medium text-gray-900 dark:text-gray-700">
                 {isValidValue ? formatNumber(data.avg_rpue) : t("text-na")}
-                {isValidValue && ` TZS/fisher/day`}
+                {isValidValue && ` MZN/fisher/day`}
               </span>
             </div>
           </div>

@@ -22,7 +22,7 @@ import cn from "@utils/class-names";
 
 const TAXA_METRICS = [
   { value: "catch_kg", label: "Total Catch (kg)" },
-  { value: "total_value", label: "Total Value (TZS)" },
+  { value: "total_value", label: "Total Value (MZN)" },
   { value: "n_individuals", label: "Number of Individuals" },
 ];
 
@@ -30,7 +30,7 @@ const formatNumber = (value: number, metric: string) => {
   if (metric === "total_value") {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "TZS",
+      currency: "MZN",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);

@@ -39,13 +39,13 @@ export default function MetricSelectorDropdown() {
     {
       value: "mean_rpue",
       label: "Fisher Revenue",
-      unit: "TZS/fisher/day",
+      unit: "MZN/fisher/day",
       category: "revenue",
     },
     {
       value: "estimated_revenue_TZS",
       label: "Estimated Revenue",
-      unit: "TZS",
+      unit: "MZN",
       category: "revenue",
     },
   ];
