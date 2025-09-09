@@ -1,0 +1,36 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["**/.env.*local"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": [
+        "NEXTAUTH_SECRET",
+        "NEXTAUTH_URL",
+        "MONGODB_URI",
+        "VERCEL_URL",
+        "VERCEL"
+      ]
+    },
+    "lint": {},
+    "start": {
+      "dependsOn": ["^start"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
+      "dependsOn": ["^clean"]
+    }
+  },
+  "ui": "stream",
+  "globalEnv": [
+    "NEXTAUTH_SECRET",
+    "NEXTAUTH_URL",
+    "MONGODB_URI",
+    "VERCEL_URL",
+    "VERCEL"
+  ]
+}
