@@ -5,19 +5,11 @@ import { CustomYAxisTick } from "./components";
 let globalBmuNames: string[] = [];
 
 // District-specific color mapping for consistent visualization
-// Based on the ColorsWall palette (https://colorswall.com/palette/178887) + Blue-grey lighten-2
+// Based on the ColorsWall palette (https://colorswall.com/palette/178887)
+// Mozambique has two districts: Palma and Mocimboa
 export const DISTRICT_COLORS: Record<string, string> = {
-  "Chake chake": "#167288",   // Semi dark teal
-  "North b": "#8cdaec",      // Light sky blue
-  "Wete": "#b45248",         // Semi dark red
-  "Central": "#d48c84",      // Light rosy brown
-  "Urban": "#a89a49",        // Semi dark khaki
-  "West b": "#d6cfa2",       // Light pale goldenrod
-  "North a": "#3cb464",      // Semi dark green
-  "South": "#9bddb1",        // Light medium aquamarine
-  "Mkoani": "#643c6a",       // Semi dark purple
-  "West a": "#836394",       // Light medium purple
-  "Micheweni": "#90a4ae",    // Blue-grey lighten-2
+  "Palma": "#167288",      // Semi dark teal
+  "Mocimboa": "#b45248",   // Semi dark red
 };
 
 // Function to update the global BMU list and ensure consistent color assignment

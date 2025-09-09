@@ -2,14 +2,14 @@ import mongoose, { Schema, Types } from "mongoose";
 
 export type TDistrict = {
   _id: Types.ObjectId;
-  district: string;
-  region: string; // e.g., "Unguja" or "Pemba"
+  district: string; // e.g., "Palma" or "Mocimboa"
+  region: string; // e.g., "Cabo Delgado" (province level)
   lat?: number;
   lng?: number;
 };
 
 /**
- * Schema for Mozambique/Pemba districts
+ * Schema for Mozambique districts
  */
 const districtSchema = new Schema<TDistrict>(
   {

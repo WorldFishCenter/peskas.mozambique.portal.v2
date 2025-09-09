@@ -65,8 +65,8 @@ const sessObjectToDropdown = (session: DefaultSession & CustomSession) => {
 }
 
 export const dropdownAtom = atomWithStorage<DropdownTypes[]>('dropdown', [], undefined, { getOnInit: true });
-// By default, select one district from Pemba (e.g., 'Wete') and one from Unguja (e.g., 'Central')
-export const districtsAtom = atomWithStorage<string[]>('districts', ['Wete', 'Central'], undefined, { getOnInit: true });
+// By default, select both Mozambique districts: Palma and Mocimboa
+export const districtsAtom = atomWithStorage<string[]>('districts', ['Palma', 'Mocimboa'], undefined, { getOnInit: true });
 export const viewModeAtom = atomWithStorage<'district' | 'region'>('viewMode', 'district', undefined, { getOnInit: true });
 
 // Global metric selector atom

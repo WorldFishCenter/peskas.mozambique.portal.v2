@@ -9,7 +9,7 @@ export const userPreferencesAtom = atomWithStorage<{ selectedRegion?: string }>(
  * Simplified hook for user permission management - Mozambique version
  * 
  * Provides basic authentication and simplified permission structure
- * for Mozambique/Pemba fishing data application.
+ * for Mozambique fishing data application.
  * 
  * TEMPORARILY MODIFIED FOR OPEN ACCESS - All users have full permissions
  */

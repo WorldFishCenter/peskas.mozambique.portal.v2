@@ -256,11 +256,8 @@ export default function CatchMetricsChart({
 
   const [districts] = useAtom(districtsAtom);
   
-  // Default districts list if none selected - memoized to prevent infinite loops
-  const defaultDistricts = useMemo(() => [
-    'Central', 'North A', 'North B', 'South', 'Urban', 'West',
-    'Chake Chake', 'Mkoani', 'Micheweni', 'Wete'
-  ], []);
+  // Default districts list - use both Mozambique districts
+  const defaultDistricts = useMemo(() => ['Palma', 'Mocimboa'], []);
   
   // Use centralized permissions hook
   const {

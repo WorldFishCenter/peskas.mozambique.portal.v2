@@ -90,7 +90,7 @@ export const METRIC_OPTIONS: MetricOption[] = [
   {
     value: "estimated_revenue_TZS",
     label: "Estimated Revenue",
-    unit: "TZS",
+    unit: "MZN",
     category: "revenue",
   },
 ];

@@ -4,18 +4,11 @@ import { DistrictSummaryModel } from "@repo/nosql/schema/district-summary";
 import getDb from "@repo/nosql";
 import { TRPCError } from "@trpc/server";
 
-// District to region mapping
-const DISTRICT_REGIONS: Record<string, 'Unguja' | 'Pemba'> = {
-  'Central': 'Unguja',
-  'North A': 'Unguja',
-  'North B': 'Unguja',
-  'South': 'Unguja',
-  'Urban': 'Unguja',
-  'West': 'Unguja',
-  'Chake chake': 'Pemba',
-  'Mkoani': 'Pemba',
-  'Micheweni': 'Pemba',
-  'Wete': 'Pemba',
+// District to region mapping for Mozambique
+// Both districts are in Cabo Delgado province
+const DISTRICT_REGIONS: Record<string, string> = {
+  'Palma': 'Cabo Delgado',
+  'Mocimboa': 'Cabo Delgado',
 };
 
 export const districtSummaryRouter = createTRPCRouter({
@@ -174,7 +167,8 @@ export const districtSummaryRouter = createTRPCRouter({
           const dateStr = s.date ? s.date.toISOString().slice(0, 10) : undefined;
           if (!dateStr) continue;
           if (!grouped[metric]) grouped[metric] = {};
-          if (!grouped[metric][dateStr]) grouped[metric][dateStr] = { Unguja: [], Pemba: [] };
+          if (!grouped[metric][dateStr]) grouped[metric][dateStr] = {};
+          if (!grouped[metric][dateStr][region]) grouped[metric][dateStr][region] = [];
           grouped[metric][dateStr][region].push(s.value);
         }
 
@@ -186,21 +180,19 @@ export const districtSummaryRouter = createTRPCRouter({
           dateEntries.sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime());
           // Only keep the last 3 months
           const last3 = dateEntries.slice(-3);
-          result[metric] = {
+            result[metric] = {
             data: last3.map(([dateStr, regions]) => {
             const date = new Date(dateStr);
             const monthLabel = date.toLocaleString('default', { month: 'short', year: '2-digit' });
-              return {
-              month: monthLabel,
-              Unguja: (() => {
-                const vals = (regions.Unguja || []).filter(v => v !== null && v !== undefined && !isNaN(v));
-                return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
-              })(),
-              Pemba: (() => {
-                const vals = (regions.Pemba || []).filter(v => v !== null && v !== undefined && !isNaN(v));
-                return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
-              })(),
-            };
+              const dataPoint: any = { month: monthLabel };
+              
+              // Dynamically add all regions found in the data
+              Object.keys(regions).forEach(regionName => {
+                const vals = (regions[regionName] || []).filter(v => v !== null && v !== undefined && !isNaN(v));
+                dataPoint[regionName] = vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : null;
+              });
+              
+              return dataPoint;
             }),
             months: last3.map(([dateStr]) => {
               const date = new Date(dateStr);
@@ -242,10 +234,8 @@ export const districtSummaryRouter = createTRPCRouter({
           if (!grouped[s.district][s.indicator]) grouped[s.district][s.indicator] = [];
           grouped[s.district][s.indicator].push(s.value);
         }
-        // List of all districts (update as needed)
-        const ALL_DISTRICTS = [
-          "Central", "Chake chake", "Micheweni", "Mkoani", "North a", "North b", "South", "Urban", "West a", "West b", "Wete"
-        ];
+        // Get all districts dynamically from the database data instead of hardcoding
+        const ALL_DISTRICTS = Array.from(new Set(summaries.map(s => s.district)));
         const ALL_METRICS = [
           "mean_cpue", "mean_rpue", "n_fishers", "n_submissions", "trip_duration", "mean_price_kg", "estimated_revenue_TZS", "estimated_catch_tn"
         ];

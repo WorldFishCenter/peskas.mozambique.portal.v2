@@ -34,13 +34,13 @@ const METRIC_CONFIG = {
   //   color: '#F28F3B',
   //   currentColor: '#75ABBC',
   // },
-  // trip_duration: {
-  //   titleKey: 'metric-trip_duration-title',
-  //   unitKey: 'metric-trip_duration-unit',
-  //   descKey: 'metric-trip_duration-desc',
-  //   color: '#F28F3B',
-  //   currentColor: '#75ABBC',
-  // },
+  trip_duration: {
+    titleKey: 'metric-trip_duration-title',
+    unitKey: 'metric-trip_duration-unit',
+    descKey: 'metric-trip_duration-desc',
+    color: '#F28F3B',
+    currentColor: '#75ABBC',
+  },
   mean_cpue: {
     titleKey: 'metric-mean_cpue-title',
     unitKey: 'metric-mean_cpue-unit',
@@ -55,13 +55,13 @@ const METRIC_CONFIG = {
     color: '#F28F3B',
     currentColor: '#75ABBC',
   },
-  // mean_price_kg: {
-  //   titleKey: 'metric-mean_price_kg-title',
-  //   unitKey: 'metric-mean_price_kg-unit',
-  //   descKey: 'metric-mean_price_kg-desc',
-  //   color: '#F28F3B',
-  //   currentColor: '#75ABBC',
-  // },
+  mean_price_kg: {
+    titleKey: 'metric-mean_price_kg-title',
+    unitKey: 'metric-mean_price_kg-unit',
+    descKey: 'metric-mean_price_kg-desc',
+    color: '#F28F3B',
+    currentColor: '#75ABBC',
+  },
   estimated_catch_tn: {
     titleKey: 'metric-estimated_catch_tn-title',
     unitKey: 'metric-estimated_catch_tn-unit',
@@ -101,18 +101,32 @@ function MetricBarCard({
   // Use the months from the API if available, otherwise fallback to last3Months
   const allMonths = (data.months && data.months.slice(-3)) || last3Months.map((item: any) => item.month);
 
+  // Get all available regions from the data dynamically
+  const availableRegions = new Set<string>();
+  last3Months.forEach((item: any) => {
+    Object.keys(item).forEach(key => {
+      if (key !== 'month') {
+        availableRegions.add(key);
+      }
+    });
+  });
+  const regionsList = Array.from(availableRegions);
+
   // Build chartData for all months, filling missing values with null
   const chartData = allMonths.map((month: string) => {
     const item = last3Months.find((d: any) => d.month === month) || {};
-    return {
-      month,
-      Unguja: item.Unguja ?? null,
-      Pemba: item.Pemba ?? null,
-    };
+    const result: any = { month };
+    
+    // Add all regions dynamically
+    regionsList.forEach(region => {
+      result[region] = item[region] ?? null;
+    });
+    
+    return result;
   });
 
   // Robust custom label component
-  const BarValueLabel = (region: 'Unguja' | 'Pemba') => {
+  const BarValueLabel = (region: string) => {
     const Label = (props: any) => {
       const { index, x, y, width, fill } = props;
       const value = chartData[index]?.[region];
@@ -129,7 +143,7 @@ function MetricBarCard({
   // Helper to format values with commas or compact notation for large numbers
   const formatValue = (value: any) => {
     if (value === null || value === undefined || isNaN(value)) return '-';
-    // Special case: Estimated Revenue (TZS) always in millions
+    // Special case: Estimated Revenue (MZN) always in millions
     if (metric === 'estimated_revenue_TZS') {
       const millions = value / 1_000_000;
       return millions.toLocaleString(undefined, { maximumFractionDigits: 1, minimumFractionDigits: 0 }) + 'M';
@@ -144,8 +158,18 @@ function MetricBarCard({
 
   // Get individual region values for current month
   const lastDataPoint = last3Months[last3Months.length - 1];
-  const ungujaValue = lastDataPoint?.Unguja;
-  const pembaValue = lastDataPoint?.Pemba;
+  
+  // Define colors for Mozambique districts/regions
+  const getRegionColor = (region: string, index: number) => {
+    // Use specific colors for known Mozambique districts
+    const mozambiqueColors: Record<string, string> = {
+      'Palma': '#167288',      // Semi dark teal
+      'Mocimboa': '#b45248',   // Semi dark red
+      'Cabo Delgado': '#F28F3B', // Orange for province level
+    };
+    
+    return mozambiqueColors[region] || ['#F28F3B', '#75ABBC', '#4CAF50', '#FF5722', '#9C27B0', '#00BCD4'][index % 6];
+  };
 
   // Use built-in LabelList with formatter and theme-consistent color
   return (
@@ -159,9 +183,17 @@ function MetricBarCard({
         <Text className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{t(config.descKey)}</Text>
       </div>
       <div className="flex items-baseline gap-3 mb-2">
-        <div className="flex gap-2 text-sm sm:text-base">
-          <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full" style={{background:'#F28F3B'}}></span><span className="text-gray-700 dark:text-gray-700">Unguja: {formatValue(ungujaValue)}</span></span>
-          <span className="flex items-center gap-1"><span className="inline-block w-2 h-2 rounded-full" style={{background:'#75ABBC'}}></span><span className="text-gray-700 dark:text-gray-700">Pemba: {formatValue(pembaValue)}</span></span>
+        <div className="flex gap-2 text-sm sm:text-base flex-wrap">
+          {regionsList.map((region, index) => {
+            const value = lastDataPoint?.[region];
+            const color = getRegionColor(region, index);
+            return (
+              <span key={region} className="flex items-center gap-1">
+                <span className="inline-block w-2 h-2 rounded-full" style={{background: color}}></span>
+                <span className="text-gray-700 dark:text-gray-700">{region}: {formatValue(value)}</span>
+              </span>
+            );
+          })}
         </div>
       </div>
       <div className="flex-1 flex items-end">
@@ -179,24 +211,20 @@ function MetricBarCard({
                 tickLine={false}
                 className="dark:fill-gray-300"
               />
-              <Bar dataKey="Unguja" fill="#F28F3B" radius={[2, 2, 0, 0]} barSize={18} minPointSize={6}> {/* minPointSize added */}
-                <LabelList
-                  dataKey="Unguja"
-                  position="top"
-                  formatter={formatValue}
-                  fill="#F28F3B"
-                  style={{ fontSize: 11, fontWeight: 600 }}
-                />
-              </Bar>
-              <Bar dataKey="Pemba" fill="#75ABBC" radius={[2, 2, 0, 0]} barSize={18} minPointSize={6}> {/* minPointSize added */}
-                <LabelList
-                  dataKey="Pemba"
-                  position="top"
-                  formatter={formatValue}
-                  fill="#75ABBC"
-                  style={{ fontSize: 11, fontWeight: 600 }}
-                />
-              </Bar>
+              {regionsList.map((region, index) => {
+                const color = getRegionColor(region, index);
+                return (
+                  <Bar key={region} dataKey={region} fill={color} radius={[2, 2, 0, 0]} barSize={18} minPointSize={6}>
+                    <LabelList
+                      dataKey={region}
+                      position="top"
+                      formatter={formatValue}
+                      fill={color}
+                      style={{ fontSize: 11, fontWeight: 600 }}
+                    />
+                  </Bar>
+                );
+              })}
             </BarChart>
           </ResponsiveContainer>
         </div>
