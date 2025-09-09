@@ -88,11 +88,11 @@ const LoadingState = () => {
 // Custom treemap tooltip
 const TreemapTooltip = ({ active, payload, selectedTimeRange }: any) => {
   const { t } = useTranslation("common");
-  
+
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const isValidValue = data.avg_rpue !== undefined && data.avg_rpue !== null;
-    
+
     return (
       <div className="bg-gray-0 dark:bg-gray-50 p-3 rounded shadow-lg border border-muted min-w-[180px] text-gray-900 dark:text-gray-700">
         <div className="font-semibold text-gray-900 dark:text-gray-700 mb-1">{data.gear}</div>
@@ -128,11 +128,11 @@ const TreemapTooltip = ({ active, payload, selectedTimeRange }: any) => {
 // Custom treemap content component to handle visibility state and labels
 const CustomizedTreemapContent = (props: any) => {
   const { x, y, width, height, name, value, fill, index } = props;
-  
+
   // Only show text if the rectangle is big enough
   const showLabel = width > 50 && height > 25;
   const showValue = width > 70 && height > 35;
-  
+
   return (
     <g>
       <rect
@@ -194,43 +194,43 @@ export default function RpueGearTreemap({
   // Removed rpueData state - using transformedData directly instead
   const [loading, setLoading] = useState(true);
   const [processingError, setProcessingError] = useState<string | null>(null);
-  
+
   // Use simple translation pattern like other components
   const { t } = useTranslation("common");
-  
+
   const [districts] = useAtom(districtsAtom);
   const [selectedTimeRange] = useAtom(selectedTimeRangeAtom);
   const [visibilityState, setVisibilityState] = useState<VisibilityState>({});
-  
+
   // Calculate date range based on selected time range (same logic as catch-time-series)
   const getDateRange = useCallback(() => {
     const now = new Date();
     let startDate: Date;
-    
+
     if (selectedTimeRange === "all") {
       return { startDate: undefined, endDate: undefined };
     }
-    
+
     const months = typeof selectedTimeRange === "number" ? selectedTimeRange : 3;
     startDate = new Date(now.getFullYear(), now.getMonth() - months, now.getDate());
-    
+
     return {
       startDate: startDate.toISOString(),
       endDate: now.toISOString(),
     };
   }, [selectedTimeRange]);
-  
+
   // Add refs to track initialization states
   const dataProcessed = useRef<boolean>(false);
   const previousDistricts = useRef<string[]>(districts || []);
   const previousTimeRange = useRef<string | number>(selectedTimeRange);
-  
+
   // Memoize the query parameters to prevent unnecessary refetches
   const queryParams = useMemo(() => ({
     districts: districts || [],
     ...getDateRange()
   }), [districts, getDateRange]);
-  
+
   // Use the same query pattern as catch-time-series
   const { data: rawData = [], isLoading, error } = api.gear.rpueByGear.useQuery(
     queryParams,
@@ -249,15 +249,20 @@ export default function RpueGearTreemap({
   // Transform data for treemap (same pattern as other components)
   const transformedData = useMemo(() => {
     if (!rawData) return [];
-    
-    return rawData.map((item: any, index: number) => ({
-      gear: capitalizeGearType(item.gear.replace(/_/g, " ")),
-      name: capitalizeGearType(item.gear.replace(/_/g, " ")), // Add name field for treemap
-      avg_rpue: Number(item.avg_rpue.toFixed(2)),
-      total_records: item.total_records,
-      district_count: item.district_count,
-      fill: GEAR_COLORS[index % GEAR_COLORS.length]
-    }));
+
+    return rawData.map((item: any, index: number) => {
+      // Handle null or undefined gear values
+      const gearName = item.gear ? item.gear.replace(/_/g, " ") : "Unknown";
+
+      return {
+        gear: capitalizeGearType(gearName),
+        name: capitalizeGearType(gearName), // Add name field for treemap
+        avg_rpue: Number(item.avg_rpue?.toFixed(2) || 0),
+        total_records: item.total_records || 0,
+        district_count: item.district_count || 0,
+        fill: GEAR_COLORS[index % GEAR_COLORS.length]
+      };
+    });
   }, [rawData]);
 
   // Initialize visibility state when data changes
@@ -268,7 +273,7 @@ export default function RpueGearTreemap({
         const currentGears = Object.keys(prevState);
         const dataGears = transformedData.map(item => item.gear);
         const needsUpdate = dataGears.some(gear => !currentGears.includes(gear));
-        
+
         if (needsUpdate || currentGears.length === 0) {
           return transformedData.reduce<VisibilityState>(
             (acc: VisibilityState, item: RpueDataItem) => ({
@@ -284,7 +289,7 @@ export default function RpueGearTreemap({
   }, [transformedData]);
 
   const getTimeRangeLabel = () => {
-    const timeRangeOption = TIME_RANGES.find(option => 
+    const timeRangeOption = TIME_RANGES.find(option =>
       option.value === selectedTimeRange
     );
     return timeRangeOption ? timeRangeOption.label : "Last 3 months";
@@ -333,7 +338,7 @@ export default function RpueGearTreemap({
               {t("text-rpue-by-gear") || "RPUE by Gear Type"}
             </div>
             <div className="text-xs text-gray-500 text-center mt-1">
-              {t("text-rpue-treemap-description") || 
+              {t("text-rpue-treemap-description") ||
                 `Average RPUE (Revenue Per Unit Effort) by gear type for selected districts. Time range: ${getTimeRangeLabel()}`}
             </div>
           </div>
@@ -352,11 +357,11 @@ export default function RpueGearTreemap({
           {t("text-rpue-by-gear") || "RPUE by Gear Type"}
         </div>
         <div className="text-xs text-gray-500 mt-1">
-          {t("text-rpue-treemap-description") || 
+          {t("text-rpue-treemap-description") ||
             `Average RPUE by gear type for selected districts. Time range: ${getTimeRangeLabel()}`}
         </div>
       </div>
-      
+
       <SimpleBar>
         <div className="w-full h-[600px] pt-4">
           <ResponsiveContainer width="100%" height="100%">
@@ -372,14 +377,14 @@ export default function RpueGearTreemap({
               }
             >
               {transformedData.map((entry: RpueDataItem, index: number) => (
-                <Cell 
-                  key={`cell-${index}`} 
+                <Cell
+                  key={`cell-${index}`}
                   name={entry.name}
                   fill={entry.fill}
                 />
               ))}
-              <Tooltip 
-                content={(props) => <TreemapTooltip {...props} selectedTimeRange={selectedTimeRange} />} 
+              <Tooltip
+                content={(props) => <TreemapTooltip {...props} selectedTimeRange={selectedTimeRange} />}
                 wrapperStyle={{ outline: 'none' }}
               />
             </Treemap>

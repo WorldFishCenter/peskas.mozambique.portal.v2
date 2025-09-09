@@ -250,14 +250,19 @@ export default function CpueGearTreemap({
   const transformedData = useMemo(() => {
     if (!rawData) return [];
     
-    return rawData.map((item: any, index: number) => ({
-      gear: capitalizeGearType(item.gear.replace(/_/g, " ")),
-      name: capitalizeGearType(item.gear.replace(/_/g, " ")), // Add name field for treemap
-      avg_cpue: Number(item.avg_cpue.toFixed(2)),
-      total_records: item.total_records,
-      district_count: item.district_count,
-      fill: GEAR_COLORS[index % GEAR_COLORS.length]
-    }));
+    return rawData.map((item: any, index: number) => {
+      // Handle null or undefined gear values
+      const gearName = item.gear ? item.gear.replace(/_/g, " ") : "Unknown";
+      
+      return {
+        gear: capitalizeGearType(gearName),
+        name: capitalizeGearType(gearName), // Add name field for treemap
+        avg_cpue: Number(item.avg_cpue?.toFixed(2) || 0),
+        total_records: item.total_records || 0,
+        district_count: item.district_count || 0,
+        fill: GEAR_COLORS[index % GEAR_COLORS.length]
+      };
+    });
   }, [rawData]);
 
   // Initialize visibility state when data changes
