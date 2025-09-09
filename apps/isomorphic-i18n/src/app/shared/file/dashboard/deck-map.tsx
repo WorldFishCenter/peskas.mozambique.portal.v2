@@ -48,9 +48,9 @@ const lightingEffect = new LightingEffect({
 });
 
 const INITIAL_VIEW_STATE: MapViewState = {
-  longitude: 39.8,
-  latitude: -4.3,
-  zoom: 8,
+  longitude: 35.5,
+  latitude: -18.7,
+  zoom: 6,
   minZoom: 5,
   maxZoom: 15,
   pitch: 40.5,

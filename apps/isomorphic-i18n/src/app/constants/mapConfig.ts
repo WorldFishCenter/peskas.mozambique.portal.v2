@@ -20,9 +20,9 @@ export const COLOR_RANGE = [
 
 // Initial map view state
 export const INITIAL_VIEW_STATE = {
-  longitude: 39.19,  // Mozambique City longitude
-  latitude: -6.16,   // Mozambique City latitude
-  zoom: 8,          // Reduced zoom level for better overview
+  longitude: 36,   // Mozambique center longitude
+  latitude: -19,   // Mozambique center latitude
+  zoom: 6,          // Better zoom level to show entire country
   pitch: 45,        // Add tilt to see 3D
   bearing: 10       // Slight rotation for better perspective
 };
